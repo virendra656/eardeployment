@@ -1,0 +1,86 @@
+<?xml version="1.0"?> 
+<!DOCTYPE xml>
+<project name="x3" default="all" basedir=".">
+	
+	<property name="compiledWebClasses" value="${basedir}/build/classes" />
+	<property name="dist" value="${basedir}/dist" />
+	<property name="descriptors" value="${basedir}/dd" />
+	<property name="build" value="${basedir}/build" />
+	
+	<property name="JBOSS_CLIENT_LIB" value="C:\jboss5dummy\jboss-5.0.1.GA\client" />
+	<property name="JBOSS_LIB" value="C:\jboss5dummy\jboss-5.0.1.GA\lib" />
+	<property name="JBOSS_COMMON_LIB" value="C:\jboss5dummy\jboss-5.0.1.GA\common\lib" />
+
+
+	<path id="compile.classpath">
+		<fileset dir="${JBOSS_CLIENT_LIB}">
+			<include name="*.jar"/>
+		</fileset>
+		
+		<fileset dir="${JBOSS_LIB}">
+					<include name="*.jar"/>
+				</fileset>
+			
+			<fileset dir="${JBOSS_COMMON_LIB}">
+						<include name="*.jar"/>
+					</fileset>
+		<fileset dir="${basedir}/lib">
+								<include name="*.jar"/>
+							</fileset>
+	</path>
+	
+	<target name="clean">
+		<delete dir="${basedir}/build" />
+		<delete dir="${basedir}/dist" />
+	</target>
+
+	<target name="createFolders">
+		<mkdir dir="${basedir}/build/classes" />
+		<mkdir dir="${basedir}/dist" /> 
+	</target>
+
+	<target name="compile">
+		<javac srcdir="src" destdir="build/classes" debug="true">
+			<classpath refid="compile.classpath"/>
+		</javac>
+	</target>
+	
+	<target name="jar">
+			<jar jarfile="${build}/x3.jar">
+				<fileset  dir="${compiledWebClasses}">
+						<include name="**/ejb/**"/>
+				</fileset>
+				<metainf dir="${descriptors}">
+					<include name="persistence.xml"/>
+				</metainf>
+			</jar>
+	</target>
+	
+	<fileset dir="${compiledWebClasses}" id="warClasses.fileset">
+		<include name="**/controller/**" />
+	</fileset>
+	
+	<target name="war">
+		<war destfile="${build}/x3.war" webxml="${basedir}/WebContent/WEB-INF/web.xml">
+			<fileset dir="${basedir}/WebContent"/>
+			<classes refid="warClasses.fileset"/>
+		</war>
+	</target>
+	
+	<target name="ear">
+			<jar destfile="${dist}/x3.ear">
+				<metainf dir="${descriptors}">
+					<include name="application.xml"/>
+					<include name="jboss-app.xml"/>                
+				 </metainf>
+				<fileset file="${build}/x3.war"/>
+				<fileset file="${build}/x3.jar"/>
+				
+			</jar>
+		</target>
+	
+	<target name="all" depends="clean, createFolders, compile, jar, war, ear">
+		<echo message="done" />
+	</target>
+
+</project>
